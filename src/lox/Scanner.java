@@ -116,10 +116,6 @@ public class Scanner {
                     number();
                 } else if (isAlpha(c)) {
                     identifier();
-                    String text = source.substring(start, current);
-                    TokenType type = keywords.get(text);
-                    if (type == null) type = TokenType.IDENTIFIER;
-                    addToken(type);
                 } else {
                     Lox.error(line, "Unexpected character.");
                 }
@@ -128,7 +124,10 @@ public class Scanner {
 
     private void identifier() {
         while (isAlphaNumeric(peek())) advance();
-        addToken(TokenType.IDENTIFIER);
+        String text = source.substring(start, current);
+        TokenType type = keywords.get(text);
+        if (type == null) type = TokenType.IDENTIFIER;
+        addToken(type);
     }
 
     private boolean isAlpha(char c) {
