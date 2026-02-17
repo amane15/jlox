@@ -3,7 +3,9 @@ package lox;
 import java.util.List;
 
 public class Parser {
-    private static class ParseError extends RuntimeException {}
+    private static class ParseError extends RuntimeException {
+    }
+
     private final List<Token> tokens;
     private int current = 0;
 
@@ -26,7 +28,7 @@ public class Parser {
     private Expr equality() {
         Expr expr = comparison();
 
-        while match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL) {
+        while (match(TokenType.BANG_EQUAL, TokenType.EQUAL_EQUAL)) {
             Token operator = previous();
             Expr right = comparison();
             expr = new Expr.Binary(expr, operator, right);
@@ -38,7 +40,7 @@ public class Parser {
     private Expr comparison() {
         Expr expr = term();
 
-        while match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL) {
+        while (match(TokenType.GREATER, TokenType.GREATER_EQUAL, TokenType.LESS, TokenType.LESS_EQUAL)) {
             Token operator = previous();
             Expr right = term();
             expr = new Expr.Binary(expr, operator, right);
@@ -50,7 +52,7 @@ public class Parser {
     private Expr term() {
         Expr expr = factor();
 
-        while match(TokenType.MINUS, TokenType.PLUS) {
+        while (match(TokenType.MINUS, TokenType.PLUS)) {
             Token operator = previous();
             Expr right = factor();
             expr = new Expr.Binary(expr, operator, right);
@@ -62,7 +64,7 @@ public class Parser {
     private Expr factor() {
         Expr expr = unary();
 
-        while match(TokenType.SLASH, TokenType.STAR) {
+        while (match(TokenType.SLASH, TokenType.STAR)) {
             Token operator = previous();
             Expr right = unary();
             expr = new Expr.Binary(expr, operator, right);
@@ -75,7 +77,7 @@ public class Parser {
         if (match(TokenType.BANG, TokenType.MINUS)) {
             Token operator = previous();
             Expr right = unary();
-            return new Expr.Binary(operator, right);
+            return new Expr.Unary(operator, right);
         }
 
         return primary();
@@ -100,7 +102,7 @@ public class Parser {
     }
 
     private Token consume(TokenType type, String message) {
-        if (check(type)) return  advance();
+        if (check(type)) return advance();
         throw error(peek(), message);
     }
 
@@ -112,7 +114,7 @@ public class Parser {
     private void synchronize() {
         advance();
 
-        while(!isAtEnd()) {
+        while (!isAtEnd()) {
             if (previous().type == TokenType.SEMICOLON) return;
 
             switch (peek().type) {
@@ -124,15 +126,16 @@ public class Parser {
                 case WHILE:
                 case PRINT:
                 case RETURN:
-                    return;            }
+                    return;
+            }
         }
 
         advance();
     }
 
     private boolean match(TokenType... types) {
-        for (TokenType type: types) {
-            if(check(type)) {
+        for (TokenType type : types) {
+            if (check(type)) {
                 advance();
                 return true;
             }
